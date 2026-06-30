@@ -18,39 +18,24 @@ function getRankClass(rank) {
   }
 }
 
-// Data storage functions using localStorage
-let cachedUsers = null;
+// Raw GitHub Users URL - buraya kendi raw linkinizi yazın!
+const USERS_RAW_URL = 'https://raw.githubusercontent.com/uefibootkit/Hide-N-Seek-Users/refs/heads/main/users.json';
 
-function initializeDefaultUsers() {
-  // Check if users exist in localStorage, if not create some defaults
-  let users = localStorage.getItem('saklambac_users');
-  if (!users) {
-    const defaultUsers = {};
-    // No default users for security - first register becomes Owner
-    localStorage.setItem('saklambac_users', JSON.stringify(defaultUsers));
-    return defaultUsers;
-  }
-  return JSON.parse(users);
-}
-
+// Data storage functions - fetch from remote every time
 async function getUsers() {
-  if (cachedUsers) {
-    return cachedUsers;
-  }
-  
   try {
-    const usersObj = initializeDefaultUsers();
-    cachedUsers = usersObj;
+    const response = await fetch(USERS_RAW_URL + '?t=' + Date.now()); // cache önlemek için timestamp ekle
+    const usersArray = await response.json();
+    // Array'i objeye çevir, username key olarak kullan
+    const usersObj = {};
+    usersArray.forEach(user => {
+      usersObj[user.username] = user;
+    });
     return usersObj;
   } catch (e) {
     console.error('Kullanıcılar çekilirken hata:', e);
     return {};
   }
-}
-
-function saveUsers(users) {
-  localStorage.setItem('saklambac_users', JSON.stringify(users));
-  cachedUsers = users;
 }
 
 function getCurrentUser() {
@@ -169,7 +154,6 @@ async function updateUserUI(user) {
   
   await renderUsersList();
   await updateTargetUserSelect();
-  await updateRankUserSelect();
 }
 
 async function renderUsersList() {
@@ -352,91 +336,6 @@ function showMain() {
 
 // Event listeners
 function initEventListeners() {
-  // Show register
-  const showRegister = document.getElementById('show-register');
-  if (showRegister) {
-    showRegister.addEventListener('click', function(e) {
-      e.preventDefault();
-      const loginForm = document.getElementById('login-form');
-      const registerForm = document.getElementById('register-form');
-      if (loginForm) loginForm.classList.add('hidden');
-      if (registerForm) registerForm.classList.remove('hidden');
-    });
-  }
-  
-  // Show login
-  const showLogin = document.getElementById('show-login');
-  if (showLogin) {
-    showLogin.addEventListener('click', function(e) {
-      e.preventDefault();
-      const loginForm = document.getElementById('login-form');
-      const registerForm = document.getElementById('register-form');
-      if (registerForm) registerForm.classList.add('hidden');
-      if (loginForm) loginForm.classList.remove('hidden');
-    });
-  }
-  
-  // Register
-  const registerBtn = document.getElementById('register-btn');
-  if (registerBtn) {
-    registerBtn.addEventListener('click', async function() {
-      const usernameInput = document.getElementById('register-username');
-      const passwordInput = document.getElementById('register-password');
-      const confirmInput = document.getElementById('register-confirm');
-      
-      if (!usernameInput || !passwordInput || !confirmInput) return;
-      
-      const username = usernameInput.value.trim();
-      const password = passwordInput.value;
-      const confirm = confirmInput.value;
-      
-      if (!username || !password || !confirm) {
-        alert('Please fill all fields');
-        return;
-      }
-      
-      if (password !== confirm) {
-        alert('Passwords do not match');
-        return;
-      }
-      
-      if (password.length < 4) {
-        alert('Password must be at least 4 characters');
-        return;
-      }
-      
-      const users = await getUsers();
-      
-      if (users[username]) {
-        alert('Username already exists');
-        return;
-      }
-      
-      // First user is Owner
-      const isFirstUser = Object.keys(users).length === 0;
-      const rank = isFirstUser ? 'Owner' : 'User';
-      
-      const newUser = {
-        username: username,
-        password: doubleHash(password),
-        rank: rank,
-        profile: getDefaultProfile(username)
-      };
-      
-      users[username] = newUser;
-      saveUsers(users);
-      
-      saveCurrentUser(newUser);
-      await updateUserUI(newUser);
-      showMain();
-      checkExistingCountdown();
-      
-      usernameInput.value = '';
-      passwordInput.value = '';
-      confirmInput.value = '';
-    });
-  }
-  
   // Login
   const loginBtn = document.getElementById('login-btn');
   if (loginBtn) {
@@ -557,62 +456,7 @@ function initEventListeners() {
     });
   }
   
-  // Assign rank (Owner only)
-  const assignRankBtn = document.getElementById('assign-rank-btn');
-  if (assignRankBtn) {
-    assignRankBtn.addEventListener('click', async function() {
-      const rankUserSelect = document.getElementById('rank-user-select');
-      const rankSelect = document.getElementById('rank-select');
-      if (!rankUserSelect || !rankSelect) return;
-      
-      const targetUsername = rankUserSelect.value;
-      const newRank = rankSelect.value;
-      
-      if (!targetUsername) {
-        alert('Please select a user');
-        return;
-      }
-      
-      const users = await getUsers();
-      if (!users[targetUsername]) {
-        alert('User not found');
-        return;
-      }
-      
-      users[targetUsername].rank = newRank;
-      saveUsers(users);
-      
-      // Update current user if they were the one changed
-      const currentUser = getCurrentUser();
-      if (currentUser && currentUser.username === targetUsername) {
-        currentUser.rank = newRank;
-        saveCurrentUser(currentUser);
-        await updateUserUI(currentUser);
-      } else {
-        await renderUsersList();
-        await updateTargetUserSelect();
-        await updateRankUserSelect();
-      }
-      
-      alert('Rank updated to ' + newRank + ' for ' + targetUsername + '!');
-    });
-  }
-}
-
-// Update rank user select
-async function updateRankUserSelect() {
-  const users = await getUsers();
-  const select = document.getElementById('rank-user-select');
-  if (!select) return;
-  
-  select.innerHTML = '';
-  
-  Object.values(users).forEach(user => {
-    const option = document.createElement('option');
-    option.value = user.username;
-    option.textContent = user.username + ' (' + user.rank + ')';
-    select.appendChild(option);
-  });
+  // Note: Assign rank functionality removed - update users.json manually
 }
 
 // Initialize App

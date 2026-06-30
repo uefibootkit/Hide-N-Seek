@@ -18,16 +18,6 @@
         <input type="text" id="login-username" placeholder="Username" autocomplete="username">
         <input type="password" id="login-password" placeholder="Password" autocomplete="current-password">
         <button id="login-btn">Login</button>
-        <p>Don't have an account? <a href="#" id="show-register">Register</a></p>
-      </div>
-      <div id="register-form" class="auth-form hidden">
-        <div class="brand" style="justify-content:center;margin-bottom:20px">Hide and Seek</div>
-        <h2>Register</h2>
-        <input type="text" id="register-username" placeholder="Username" autocomplete="username">
-        <input type="password" id="register-password" placeholder="Password" autocomplete="new-password">
-        <input type="password" id="register-confirm" placeholder="Confirm Password" autocomplete="new-password">
-        <button id="register-btn">Register</button>
-        <p>Already have an account? <a href="#" id="show-login">Login</a></p>
       </div>
     </div>
 
@@ -103,23 +93,6 @@
         <div id="owner-tools-tab" class="tab-content">
           <div class="panel" style="max-width:600px;margin:0 auto">
             <h3 style="text-align:center">Owner Tools</h3>
-            
-            <!-- Assign Rank -->
-            <div style="margin-top:20px">
-              <h4 style="color:var(--neon);font-family:'Press Start 2P',monospace;font-size:12px;margin-bottom:12px">Assign Rank</h4>
-              <div style="display:flex;flex-direction:column;gap:12px">
-                <div style="display:flex;gap:12px;flex-wrap:wrap">
-                  <select id="rank-user-select" style="flex:1;min-width:150px;padding:12px;border:1px solid rgba(41,11,117,0.1);border-radius:6px;background:#050505;color:#e6e6e6;font-size:14px"></select>
-                  <select id="rank-select" style="flex:1;min-width:150px;padding:12px;border:1px solid rgba(41,11,117,0.1);border-radius:6px;background:#050505;color:#e6e6e6;font-size:14px">
-                    <option value="User">User</option>
-                    <option value="Beta Tester">Beta Tester</option>
-                    <option value="Seeker">Seeker</option>
-                    <option value="Owner">Owner</option>
-                  </select>
-                  <button id="assign-rank-btn" class="btn-primary" style="width:auto">Assign Rank</button>
-                </div>
-              </div>
-            </div>
             
             <!-- Play Sound -->
             <div style="margin-top:20px">
