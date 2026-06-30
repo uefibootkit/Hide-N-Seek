@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Hide and Seek - Profile</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="app">
+    <!-- Main App -->
+    <div id="main-container" class="main-container">
+      <!-- Header -->
+      <nav class="nav">
+        <div class="brand">Hide and Seek</div>
+        <div class="menu">
+          <button class="tab-btn" id="home-btn">Home</button>
+          <button class="tab-btn active" id="profile-btn">Profile</button>
+          <button class="tab-btn" id="owner-tools-btn" style="display:none">Owner Tools</button>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px">
+          <div id="countdown-display" class="countdown hidden">00:00</div>
+          <div id="nav-username" style="color:var(--muted);font-size:12px"></div>
+          <img id="nav-avatar" src="" alt="Avatar" class="nav-avatar">
+          <button id="logout-btn" class="btn-secondary">Logout</button>
+        </div>
+      </nav>
+
+      <!-- Profile Page -->
+      <main class="main-content">
+        <div class="profile-container">
+          <div class="panel" style="max-width:600px;margin:0 auto">
+            <h3 style="text-align:center">Your Profile</h3>
+            <div class="profile-avatar-section">
+              <img id="profile-avatar" src="" alt="Profile" class="profile-avatar">
+            </div>
+            <div class="profile-info">
+              <p><strong style="color:var(--neon)">Username:</strong> <span id="profile-username"></span></p>
+              <p><strong style="color:var(--neon)">Rank:</strong> <span id="profile-rank" class="rank-badge"></span></p>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

@@ -27,9 +27,9 @@
       <nav class="nav">
         <div class="brand">Hide and Seek</div>
         <div class="menu">
-          <button class="tab-btn active" data-tab="home">Home</button>
-          <button class="tab-btn" data-tab="profile">Profile</button>
-          <button class="tab-btn" id="owner-tools-tab" data-tab="owner-tools" style="display:none">Owner Tools</button>
+          <button class="tab-btn active" id="home-btn">Home</button>
+          <button class="tab-btn" id="profile-btn">Profile</button>
+          <button class="tab-btn" id="owner-tools-btn" style="display:none">Owner Tools</button>
         </div>
         <div style="display:flex;align-items:center;gap:12px">
           <div id="countdown-display" class="countdown hidden">00:00</div>
@@ -39,70 +39,33 @@
         </div>
       </nav>
 
-      <!-- Tab Contents -->
+      <!-- Home Page -->
       <main class="main-content">
-        <!-- Home Tab -->
-        <div id="home-tab" class="tab-content active">
-          <div class="hero">
-            <div>
-              <h1 class="title">Hide and Seek</h1>
-              <p class="subtitle">The ultimate hide and seek experience</p>
-              
-              <div style="display:flex;gap:12px;margin-top:8px;flex-wrap:wrap">
-                <button id="main-action-btn" class="btn-primary">PLAY</button>
-              </div>
-
-              <!-- Owner Countdown -->
-              <div id="owner-countdown-home" class="owner-controls-home hidden" style="margin-top:20px">
-                <h3 style="color:var(--neon);font-family:'Press Start 2P',monospace;font-size:12px;margin-bottom:12px">Countdown Timer</h3>
-                <div class="countdown-controls">
-                  <input type="number" id="countdown-minutes-home" placeholder="Minutes" min="1" max="60" value="5">
-                  <button id="start-countdown-btn-home" class="btn-primary">Start</button>
-                  <button id="stop-countdown-btn-home" class="btn-danger" style="display:none">Stop</button>
-                </div>
-              </div>
-            </div>
-
-            <!-- Players List Panel -->
-            <aside class="panel">
-              <h3>PLAYERS</h3>
-              <div id="users-list-home" class="players-list"></div>
-            </aside>
-          </div>
-        </div>
-
-        <!-- Profile Tab -->
-        <div id="profile-tab" class="tab-content">
-          <div class="profile-container">
-            <div class="panel" style="max-width:600px;margin:0 auto">
-              <h3 style="text-align:center">Your Profile</h3>
-              <div class="profile-avatar-section">
-                <img id="profile-avatar" src="" alt="Profile" class="profile-avatar">
-                <input type="file" id="avatar-input" accept="image/*" class="hidden">
-                <button id="change-avatar-btn" class="btn-secondary">Change Avatar</button>
-              </div>
-              <div class="profile-info">
-                <p><strong style="color:var(--neon)">Username:</strong> <span id="profile-username"></span></p>
-                <p><strong style="color:var(--neon)">Rank:</strong> <span id="profile-rank" class="rank-badge"></span></p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Owner Tools Tab -->
-        <div id="owner-tools-tab" class="tab-content">
-          <div class="panel" style="max-width:600px;margin:0 auto">
-            <h3 style="text-align:center">Owner Tools</h3>
+        <div class="hero">
+          <div>
+            <h1 class="title">Hide and Seek</h1>
+            <p class="subtitle">The ultimate hide and seek experience</p>
             
-            <!-- Play Sound -->
-            <div style="margin-top:20px">
-              <h4 style="color:var(--neon);font-family:'Press Start 2P',monospace;font-size:12px;margin-bottom:12px">Play Sound to User</h4>
-              <div class="sound-controls">
-                <select id="target-user-select"></select>
-                <button id="play-sound-btn" class="btn-primary">Play Sound</button>
+            <div style="display:flex;gap:12px;margin-top:8px;flex-wrap:wrap">
+              <button id="main-action-btn" class="btn-primary">PLAY</button>
+            </div>
+
+            <!-- Owner Countdown -->
+            <div id="owner-countdown-home" class="owner-controls-home hidden" style="margin-top:20px">
+              <h3 style="color:var(--neon);font-family:'Press Start 2P',monospace;font-size:12px;margin-bottom:12px">Countdown Timer</h3>
+              <div class="countdown-controls">
+                <input type="number" id="countdown-minutes-home" placeholder="Minutes" min="1" max="60" value="5">
+                <button id="start-countdown-btn-home" class="btn-primary">Start</button>
+                <button id="stop-countdown-btn-home" class="btn-danger" style="display:none">Stop</button>
               </div>
             </div>
           </div>
+
+          <!-- Players List Panel -->
+          <aside class="panel">
+            <h3>ACTIVE PLAYERS</h3>
+            <div id="users-list-home" class="players-list"></div>
+          </aside>
         </div>
       </main>
     </div>

@@ -19,7 +19,7 @@ function getRankClass(rank) {
 }
 
 // Raw GitHub Users URL - buraya kendi raw linkinizi yazın!
-const USERS_RAW_URL = 'https://raw.githubusercontent.com/uefibootkit/Hide-N-Seek-Users/refs/heads/main/users.json';
+const USERS_RAW_URL = 'https://raw.githubusercontent.com/mavexymista/let-me-see-you-move/refs/heads/main/users.json';
 
 // Data storage functions - fetch from remote every time
 async function getUsers() {
@@ -49,6 +49,28 @@ function getCurrentUser() {
 
 function saveCurrentUser(user) {
   sessionStorage.setItem('saklambac_current', JSON.stringify(user));
+  // Aktif kullanıcı olarak işaretle (5 dakika aktif sayıyoruz)
+  updateActiveUser(user.username);
+}
+
+// Aktif kullanıcı takibi
+function updateActiveUser(username) {
+  const activeUsers = JSON.parse(localStorage.getItem('saklambac_active_users') || '{}');
+  activeUsers[username] = Date.now(); // Şu anki zamanı kaydet
+  localStorage.setItem('saklambac_active_users', JSON.stringify(activeUsers));
+}
+
+function getActiveUsers() {
+  const activeUsers = JSON.parse(localStorage.getItem('saklambac_active_users') || '{}');
+  const now = Date.now();
+  const fiveMinutesAgo = now - (5 * 60 * 1000); // 5 dakika önce
+  
+  // Son 5 dakikada aktif olanları filtrele
+  const activeUsernames = Object.keys(activeUsers).filter(username => 
+    activeUsers[username] > fiveMinutesAgo
+  );
+  
+  return activeUsernames;
 }
 
 function getCountdown() {
@@ -129,7 +151,7 @@ async function updateUserUI(user) {
   if (navAvatar) navAvatar.src = user.profile || getDefaultProfile(user.username);
   if (navUsername) navUsername.textContent = user.username;
   
-  // Profile page
+  // Profile page (only if we're on profile.html)
   const profileAvatar = document.getElementById('profile-avatar');
   const profileUsername = document.getElementById('profile-username');
   const profileRank = document.getElementById('profile-rank');
@@ -142,11 +164,11 @@ async function updateUserUI(user) {
   }
   
   // Owner tools visibility
-  const ownerToolsTab = document.getElementById('owner-tools-tab');
+  const ownerToolsBtn = document.getElementById('owner-tools-btn');
   const ownerCountdownHome = document.getElementById('owner-countdown-home');
   
-  if (ownerToolsTab) {
-    ownerToolsTab.style.display = user.rank === 'Owner' ? 'inline-block' : 'none';
+  if (ownerToolsBtn) {
+    ownerToolsBtn.style.display = user.rank === 'Owner' ? 'inline-block' : 'none';
   }
   if (ownerCountdownHome) {
     ownerCountdownHome.classList.toggle('hidden', user.rank !== 'Owner');
@@ -154,16 +176,22 @@ async function updateUserUI(user) {
   
   await renderUsersList();
   await updateTargetUserSelect();
+  await updateRankUserSelect();
 }
 
 async function renderUsersList() {
-  const users = await getUsers();
   const usersListHome = document.getElementById('users-list-home');
-  if (!usersListHome) return;
+  if (!usersListHome) return; // Only render on home page
+  
+  const allUsers = await getUsers();
+  const activeUsernames = getActiveUsers();
   
   usersListHome.innerHTML = '';
   
-  Object.values(users).forEach(user => {
+  activeUsernames.forEach(username => {
+    const user = allUsers[username];
+    if (!user) return;
+    
     const card = document.createElement('div');
     card.className = 'player-card';
     card.innerHTML = `
@@ -186,6 +214,21 @@ async function updateTargetUserSelect() {
     const option = document.createElement('option');
     option.value = user.username;
     option.textContent = user.username;
+    select.appendChild(option);
+  });
+}
+
+async function updateRankUserSelect() {
+  const users = await getUsers();
+  const select = document.getElementById('rank-user-select');
+  if (!select) return;
+  
+  select.innerHTML = '';
+  
+  Object.values(users).forEach(user => {
+    const option = document.createElement('option');
+    option.value = user.username;
+    option.textContent = user.username + ' (' + user.rank + ')';
     select.appendChild(option);
   });
 }
@@ -319,6 +362,17 @@ function checkExistingCountdown() {
   }
 }
 
+// Navigasyon fonksiyonları
+function navigateTo(page) {
+  // Aktif kullanıcı olarak güncelle
+  const currentUser = getCurrentUser();
+  if (currentUser) {
+    updateActiveUser(currentUser.username);
+  }
+  
+  window.location.href = page;
+}
+
 // UI Navigation
 function showAuth() {
   const authContainer = document.getElementById('auth-container');
@@ -336,7 +390,7 @@ function showMain() {
 
 // Event listeners
 function initEventListeners() {
-  // Login
+  // Login (only on index.html)
   const loginBtn = document.getElementById('login-btn');
   if (loginBtn) {
     loginBtn.addEventListener('click', async function() {
@@ -376,31 +430,24 @@ function initEventListeners() {
   if (logoutBtn) {
     logoutBtn.addEventListener('click', function() {
       sessionStorage.removeItem('saklambac_current');
-      showAuth();
+      navigateTo('index.html');
     });
   }
   
-  // Tab buttons
-  const tabBtns = document.querySelectorAll('.tab-btn');
-  tabBtns.forEach(function(btn) {
-    btn.addEventListener('click', function() {
-      const tabId = btn.getAttribute('data-tab');
-      if (!tabId) return;
-      
-      // Deactivate all tabs
-      document.querySelectorAll('.tab-btn').forEach(function(b) {
-        b.classList.remove('active');
-      });
-      document.querySelectorAll('.tab-content').forEach(function(c) {
-        c.classList.remove('active');
-      });
-      
-      // Activate this tab
-      btn.classList.add('active');
-      const tabContent = document.getElementById(tabId + '-tab');
-      if (tabContent) tabContent.classList.add('active');
-    });
-  });
+  // Nav buttons
+  const homeBtn = document.getElementById('home-btn');
+  const profileBtn = document.getElementById('profile-btn');
+  const ownerToolsBtn = document.getElementById('owner-tools-btn');
+  
+  if (homeBtn) {
+    homeBtn.addEventListener('click', () => navigateTo('index.html'));
+  }
+  if (profileBtn) {
+    profileBtn.addEventListener('click', () => navigateTo('profile.html'));
+  }
+  if (ownerToolsBtn) {
+    ownerToolsBtn.addEventListener('click', () => navigateTo('owner-tools.html'));
+  }
   
   // Main action button (only Seeker cannot use)
   const mainActionBtn = document.getElementById('main-action-btn');
@@ -414,12 +461,6 @@ function initEventListeners() {
       playWhistleSound();
     });
   }
-  
-  // Change avatar button - hide
-  const changeAvatarBtn = document.getElementById('change-avatar-btn');
-  const avatarInput = document.getElementById('avatar-input');
-  if (changeAvatarBtn) changeAvatarBtn.style.display = 'none';
-  if (avatarInput) avatarInput.style.display = 'none';
   
   // Start countdown (home)
   const startCountdownHomeBtn = document.getElementById('start-countdown-btn-home');
@@ -456,7 +497,46 @@ function initEventListeners() {
     });
   }
   
-  // Note: Assign rank functionality removed - update users.json manually
+  // Assign rank (Owner only - notifies user to update JSON manually)
+  const assignRankBtn = document.getElementById('assign-rank-btn');
+  if (assignRankBtn) {
+    assignRankBtn.addEventListener('click', async function() {
+      const rankUserSelect = document.getElementById('rank-user-select');
+      const rankSelect = document.getElementById('rank-select');
+      if (!rankUserSelect || !rankSelect) return;
+      
+      const targetUsername = rankUserSelect.value;
+      const newRank = rankSelect.value;
+      
+      if (!targetUsername) {
+        alert('Please select a user');
+        return;
+      }
+      
+      alert(`Lütfen users.json dosyasında ${targetUsername} kullanıcısının rütbesini ${newRank} olarak güncelleyin ve değişiklikleri GitHub'a pushlayın!`);
+      
+      // UI'yi güncelle (geçici olarak)
+      const currentUser = getCurrentUser();
+      if (currentUser && currentUser.username === targetUsername) {
+        currentUser.rank = newRank;
+        saveCurrentUser(currentUser);
+        await updateUserUI(currentUser);
+      } else {
+        await renderUsersList();
+        await updateTargetUserSelect();
+        await updateRankUserSelect();
+      }
+    });
+  }
+  
+  // Periyodik olarak aktif kullanıcıları güncelle ve listeyi yenile
+  setInterval(async () => {
+    const currentUser = getCurrentUser();
+    if (currentUser) {
+      updateActiveUser(currentUser.username);
+      await renderUsersList();
+    }
+  }, 10000); // Her 10 saniyede bir
 }
 
 // Initialize App
@@ -464,12 +544,24 @@ async function initApp() {
   initEventListeners();
   const currentUser = getCurrentUser();
   
+  // Giriş yapmamışsa ve index.html değilse, index.html'e yönlendir
+  const isIndexPage = window.location.pathname.endsWith('index.html') || window.location.pathname === '/' || window.location.pathname === '';
+  
+  if (!currentUser && !isIndexPage) {
+    window.location.href = 'index.html';
+    return;
+  }
+  
   if (currentUser) {
     await updateUserUI(currentUser);
-    showMain();
+    
+    // Eğer index.html'de isek showMain() çağır
+    const authContainer = document.getElementById('auth-container');
+    if (authContainer) {
+      showMain();
+    }
+    
     checkExistingCountdown();
-  } else {
-    showAuth();
   }
   
   // Kullanıcı listesini önceden yükle
