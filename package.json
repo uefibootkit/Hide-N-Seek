@@ -1,0 +1,12 @@
+{
+  "name": "hide-and-seek",
+  "version": "1.0.0",
+  "description": "Hide and seek web app",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "crypto-js": "^4.1.1"
+  }
+}

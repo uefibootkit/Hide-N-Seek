@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Şifre Hashleyici</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: 'Share Tech Mono', monospace;
+      background: #070607;
+      color: #e6e6e6;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .container {
+      background: linear-gradient(180deg, #0b0b0b, #0a0a0a);
+      border: 1px solid rgba(41, 11, 117, 0.05);
+      border-radius: 10px;
+      padding: 30px;
+      width: 100%;
+      max-width: 500px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+    }
+    h1 {
+      color: #290b75;
+      text-align: center;
+      margin-bottom: 20px;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 20px;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      color: #9aa0a6;
+    }
+    input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid rgba(41, 11, 117, 0.1);
+      border-radius: 6px;
+      background: #050505;
+      color: #e6e6e6;
+      font-size: 14px;
+      font-family: 'Share Tech Mono', monospace;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      background: rgba(41, 11, 117, 0.2);
+      color: #e6e6e6;
+      border: 1px solid #290b75;
+      border-radius: 6px;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    button:hover {
+      background: rgba(41, 11, 117, 0.4);
+    }
+    .result {
+      margin-top: 20px;
+      padding: 15px;
+      background: #050505;
+      border: 1px solid rgba(41, 11, 117, 0.1);
+      border-radius: 6px;
+      word-break: break-all;
+    }
+    .result h3 {
+      color: #290b75;
+      margin-bottom: 10px;
+      font-size: 14px;
+    }
+    .hash-value {
+      color: #e6e6e6;
+      font-size: 12px;
+    }
+  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="container">
+    <h1>Şifre Hashleyici</h1>
+    <div class="form-group">
+      <label for="password">Şifre Girin:</label>
+      <input type="text" id="password" placeholder="Hashlemek istediğiniz şifre">
+    </div>
+    <button onclick="hashPassword()">Hashle!</button>
+    
+    <div id="result" class="result" style="display: none;">
+      <h3>İki Kez SHA256 Hashlenmiş Şifre:</h3>
+      <div id="hash-value" class="hash-value"></div>
+    </div>
+  </div>
+
+  <script>
+    function doubleHash(password) {
+      const firstHash = CryptoJS.SHA256(password).toString();
+      const secondHash = CryptoJS.SHA256(firstHash).toString();
+      return secondHash;
+    }
+
+    function hashPassword() {
+      const passwordInput = document.getElementById('password');
+      const resultDiv = document.getElementById('result');
+      const hashValueDiv = document.getElementById('hash-value');
+      
+      const password = passwordInput.value.trim();
+      if (!password) {
+        alert('Lütfen bir şifre girin!');
+        return;
+      }
+      
+      const hashed = doubleHash(password);
+      hashValueDiv.textContent = hashed;
+      resultDiv.style.display = 'block';
+    }
+  </script>
+</body>
+</html>
