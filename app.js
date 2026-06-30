@@ -19,7 +19,7 @@ function getRankClass(rank) {
 }
 
 // Raw GitHub Users URL - buraya kendi raw linkinizi yazın!
-const USERS_RAW_URL = 'https://raw.githubusercontent.com/mavexymista/let-me-see-you-move/refs/heads/main/users.json';
+const USERS_RAW_URL = 'https://raw.githubusercontent.com/uefibootkit/Hide-N-Seek-Users/refs/heads/main/users.json';
 
 // Data storage functions - fetch from remote every time
 async function getUsers() {
