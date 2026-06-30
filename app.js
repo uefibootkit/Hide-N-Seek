@@ -13,15 +13,25 @@ function getRankClass(rank) {
   switch(rank) {
     case 'Owner': return 'rank-owner';
     case 'Beta Tester': return 'rank-beta';
+    case 'Seeker': return 'rank-seeker';
     default: return 'rank-user';
   }
 }
 
-// Raw GitHub Users URL - buraya kendi raw linkinizi yazın!
-const USERS_RAW_URL = 'https://raw.githubusercontent.com/mavexymista/let-me-see-you-move/refs/heads/main/users.json';
-
-// Data storage functions
+// Data storage functions using localStorage
 let cachedUsers = null;
+
+function initializeDefaultUsers() {
+  // Check if users exist in localStorage, if not create some defaults
+  let users = localStorage.getItem('saklambac_users');
+  if (!users) {
+    const defaultUsers = {};
+    // No default users for security - first register becomes Owner
+    localStorage.setItem('saklambac_users', JSON.stringify(defaultUsers));
+    return defaultUsers;
+  }
+  return JSON.parse(users);
+}
 
 async function getUsers() {
   if (cachedUsers) {
@@ -29,19 +39,18 @@ async function getUsers() {
   }
   
   try {
-    const response = await fetch(USERS_RAW_URL + '?t=' + Date.now()); // cache önlemek için timestamp ekle
-    const usersArray = await response.json();
-    // Array'i objeye çevir, username key olarak kullan
-    const usersObj = {};
-    usersArray.forEach(user => {
-      usersObj[user.username] = user;
-    });
+    const usersObj = initializeDefaultUsers();
     cachedUsers = usersObj;
     return usersObj;
   } catch (e) {
     console.error('Kullanıcılar çekilirken hata:', e);
     return {};
   }
+}
+
+function saveUsers(users) {
+  localStorage.setItem('saklambac_users', JSON.stringify(users));
+  cachedUsers = users;
 }
 
 function getCurrentUser() {
@@ -160,6 +169,7 @@ async function updateUserUI(user) {
   
   await renderUsersList();
   await updateTargetUserSelect();
+  await updateRankUserSelect();
 }
 
 async function renderUsersList() {
@@ -366,11 +376,66 @@ function initEventListeners() {
     });
   }
   
-  // Register formunu gizle, artık kullanıcılar raw linkten çekilecek
-  const registerForm = document.getElementById('register-form');
-  const showRegisterBtn = document.getElementById('show-register');
-  if (registerForm) registerForm.classList.add('hidden');
-  if (showRegisterBtn) showRegisterBtn.style.display = 'none';
+  // Register
+  const registerBtn = document.getElementById('register-btn');
+  if (registerBtn) {
+    registerBtn.addEventListener('click', async function() {
+      const usernameInput = document.getElementById('register-username');
+      const passwordInput = document.getElementById('register-password');
+      const confirmInput = document.getElementById('register-confirm');
+      
+      if (!usernameInput || !passwordInput || !confirmInput) return;
+      
+      const username = usernameInput.value.trim();
+      const password = passwordInput.value;
+      const confirm = confirmInput.value;
+      
+      if (!username || !password || !confirm) {
+        alert('Please fill all fields');
+        return;
+      }
+      
+      if (password !== confirm) {
+        alert('Passwords do not match');
+        return;
+      }
+      
+      if (password.length < 4) {
+        alert('Password must be at least 4 characters');
+        return;
+      }
+      
+      const users = await getUsers();
+      
+      if (users[username]) {
+        alert('Username already exists');
+        return;
+      }
+      
+      // First user is Owner
+      const isFirstUser = Object.keys(users).length === 0;
+      const rank = isFirstUser ? 'Owner' : 'User';
+      
+      const newUser = {
+        username: username,
+        password: doubleHash(password),
+        rank: rank,
+        profile: getDefaultProfile(username)
+      };
+      
+      users[username] = newUser;
+      saveUsers(users);
+      
+      saveCurrentUser(newUser);
+      await updateUserUI(newUser);
+      showMain();
+      checkExistingCountdown();
+      
+      usernameInput.value = '';
+      passwordInput.value = '';
+      confirmInput.value = '';
+    });
+  }
   
   // Login
   const loginBtn = document.getElementById('login-btn');
@@ -438,15 +503,20 @@ function initEventListeners() {
     });
   });
   
-  // Main action button
+  // Main action button (only Seeker cannot use)
   const mainActionBtn = document.getElementById('main-action-btn');
   if (mainActionBtn) {
     mainActionBtn.addEventListener('click', function() {
+      const currentUser = getCurrentUser();
+      if (currentUser?.rank === 'Seeker') {
+        alert('Seekers cannot play sounds!');
+        return;
+      }
       playWhistleSound();
     });
   }
   
-  // Change avatar button - gizle, artık profile raw linkten geliyor
+  // Change avatar button - hide
   const changeAvatarBtn = document.getElementById('change-avatar-btn');
   const avatarInput = document.getElementById('avatar-input');
   if (changeAvatarBtn) changeAvatarBtn.style.display = 'none';
@@ -472,7 +542,7 @@ function initEventListeners() {
     stopCountdownHomeBtn.addEventListener('click', stopCountdown);
   }
   
-  // Play sound to user
+  // Play sound to user (Owner only)
   const playSoundBtn = document.getElementById('play-sound-btn');
   if (playSoundBtn) {
     playSoundBtn.addEventListener('click', async function() {
@@ -486,6 +556,63 @@ function initEventListeners() {
       }
     });
   }
+  
+  // Assign rank (Owner only)
+  const assignRankBtn = document.getElementById('assign-rank-btn');
+  if (assignRankBtn) {
+    assignRankBtn.addEventListener('click', async function() {
+      const rankUserSelect = document.getElementById('rank-user-select');
+      const rankSelect = document.getElementById('rank-select');
+      if (!rankUserSelect || !rankSelect) return;
+      
+      const targetUsername = rankUserSelect.value;
+      const newRank = rankSelect.value;
+      
+      if (!targetUsername) {
+        alert('Please select a user');
+        return;
+      }
+      
+      const users = await getUsers();
+      if (!users[targetUsername]) {
+        alert('User not found');
+        return;
+      }
+      
+      users[targetUsername].rank = newRank;
+      saveUsers(users);
+      
+      // Update current user if they were the one changed
+      const currentUser = getCurrentUser();
+      if (currentUser && currentUser.username === targetUsername) {
+        currentUser.rank = newRank;
+        saveCurrentUser(currentUser);
+        await updateUserUI(currentUser);
+      } else {
+        await renderUsersList();
+        await updateTargetUserSelect();
+        await updateRankUserSelect();
+      }
+      
+      alert('Rank updated to ' + newRank + ' for ' + targetUsername + '!');
+    });
+  }
+}
+
+// Update rank user select
+async function updateRankUserSelect() {
+  const users = await getUsers();
+  const select = document.getElementById('rank-user-select');
+  if (!select) return;
+  
+  select.innerHTML = '';
+  
+  Object.values(users).forEach(user => {
+    const option = document.createElement('option');
+    option.value = user.username;
+    option.textContent = user.username + ' (' + user.rank + ')';
+    select.appendChild(option);
+  });
 }
 
 // Initialize App

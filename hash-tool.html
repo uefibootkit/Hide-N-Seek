@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Şifre Hashleyici</title>
+  <title>Password Hasher</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
   <style>
     * {
@@ -92,15 +92,15 @@
 </head>
 <body>
   <div class="container">
-    <h1>Şifre Hashleyici</h1>
+    <h1>Password Hasher</h1>
     <div class="form-group">
-      <label for="password">Şifre Girin:</label>
-      <input type="text" id="password" placeholder="Hashlemek istediğiniz şifre">
+      <label for="password">Password:</label>
+      <input type="text" id="password" placeholder="The password you want to hash">
     </div>
-    <button onclick="hashPassword()">Hashle!</button>
+    <button onclick="hashPassword()">Hash it!</button>
     
     <div id="result" class="result" style="display: none;">
-      <h3>İki Kez SHA256 Hashlenmiş Şifre:</h3>
+      <h3>Hashed Password:</h3>
       <div id="hash-value" class="hash-value"></div>
     </div>
   </div>
@@ -119,7 +119,7 @@
       
       const password = passwordInput.value.trim();
       if (!password) {
-        alert('Lütfen bir şifre girin!');
+        alert('Please write a password!');
         return;
       }
       
